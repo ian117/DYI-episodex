@@ -1,0 +1,20 @@
+# Entorno virtual
+.venv/
+
+# Base de datos
+tracker/db/tracker.db
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Editor
+.vscode/
+.idea/
+*.swp
