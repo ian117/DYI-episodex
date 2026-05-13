@@ -281,6 +281,31 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Error al importar", f"No se pudo leer el archivo:\n{e}")
             return
 
+        # Sincronizar catálogos con valores nuevos del archivo
+        known_types = {v.lower() for v in self._manager.get_types()}
+        known_statuses = {v.lower() for v in self._manager.get_statuses()}
+        known_platforms = {v.lower() for v in self._manager.get_platforms()}
+        catalogs_changed = False
+
+        for t in candidates:
+            if t.type and t.type.lower() not in known_types:
+                self._manager.add_type(t.type)
+                known_types.add(t.type.lower())
+                catalogs_changed = True
+            if t.status and t.status.lower() not in known_statuses:
+                self._manager.add_status(t.status)
+                known_statuses.add(t.status.lower())
+                catalogs_changed = True
+            if t.platform and t.platform.lower() not in known_platforms:
+                self._manager.add_platform(t.platform)
+                known_platforms.add(t.platform.lower())
+                catalogs_changed = True
+
+        if catalogs_changed:
+            self._refresh_type_filter()
+            self._refresh_status_filter()
+            self._refresh_platform_filter()
+
         existing = {t.title.lower() for t in self._manager.get_all()}
         imported = skipped = 0
         for t in candidates:

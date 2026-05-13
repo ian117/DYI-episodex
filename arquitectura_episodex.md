@@ -125,6 +125,8 @@ Importación:
 
 Ambos métodos de importación devuelven `Title` con `id=None` — el ID lo asigna la DB al insertar. Los valores nulos del archivo (`None`, `""`, `"None"`) se normalizan correctamente.
 
+La sincronización de catálogos ocurre en `MainWindow._import_dialog`: antes de insertar títulos, compara los valores de `type`, `status` y `platform` de cada candidato contra los catálogos existentes y llama a `add_type` / `add_status` / `add_platform` por cada valor nuevo. Si hubo cambios, refresca los filtros correspondientes con `blockSignals`.
+
 ### `ui/main_window.py`
 - `QMainWindow` con `QTableWidget`
 - Barra de filtros: tipo, estado, plataforma (cargados desde DB)
@@ -169,7 +171,7 @@ Dos mecanismos con propósitos distintos:
 | Copiar `tracker.db` | Títulos + catálogos personalizados | Migración completa entre equipos, backup total |
 | Exportar/Importar CSV o JSON | Solo títulos | Mezcla de datos, backup parcial, interoperabilidad |
 
-Al importar, los valores de `type`, `status` y `platform` se guardan tal cual vienen del archivo. Si alguno no existe en el catálogo de la DB de destino, el título queda guardado correctamente pero ese valor no aparece en filtros ni dropdowns hasta que el usuario lo agregue al catálogo manualmente.
+Al importar desde CSV/JSON, los valores de `type`, `status` y `platform` que no existan en los catálogos de la DB de destino se agregan automáticamente antes de insertar los títulos. Los filtros se refrescan si hubo cambios en algún catálogo.
 
 ## Notas de implementación
 

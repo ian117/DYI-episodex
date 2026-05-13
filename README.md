@@ -57,7 +57,7 @@ Valores iniciales:
 
 **Exportar** — guarda toda la biblioteca en **CSV** o **JSON** desde el botón "Exportar".
 
-**Importar** — carga títulos desde un archivo CSV o JSON con el botón "Importar". Los títulos cuyo nombre ya exista en la biblioteca se omiten automáticamente.
+**Importar** — carga títulos desde un archivo CSV o JSON con el botón "Importar". Los títulos cuyo nombre ya exista en la biblioteca se omiten automáticamente. Los valores de tipo, estado y plataforma que no existan en los catálogos se agregan automáticamente.
 
 ### Migración / Backup
 
@@ -68,7 +68,7 @@ Hay dos formas de mover o respaldar los datos:
 | Copiar `tracker/db/tracker.db` | Todo: títulos y catálogos personalizados (tipos, estados, plataformas) | Migrar toda la biblioteca a otro equipo o hacer backup completo |
 | Importar CSV / JSON | Solo títulos | Mezclar datos de distintas fuentes o restaurar un export parcial |
 
-> **Nota:** al importar desde CSV/JSON, los valores de tipo, estado y plataforma se guardan tal cual están en el archivo. Si alguno no existe en el catálogo de la DB de destino, el título quedará guardado correctamente pero ese valor no aparecerá en los filtros ni en el dropdown del formulario hasta que el usuario lo agregue al catálogo manualmente.
+> Al importar desde CSV/JSON, los valores de tipo, estado y plataforma que no existan en el catálogo de destino se agregan automáticamente antes de insertar los títulos.
 
 ---
 
