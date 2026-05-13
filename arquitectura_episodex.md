@@ -115,14 +115,21 @@ Métodos de catálogos (mismo patrón para `types`, `statuses` y `platforms`):
 - *(ídem para `statuses` y `platforms`)*
 
 ### `services/exporter.py`
+Exportación:
 - `to_csv(titles: list[Title], path: str) -> None`
 - `to_json(titles: list[Title], path: str) -> None`
+
+Importación:
+- `from_csv(path: str) -> list[Title]`
+- `from_json(path: str) -> list[Title]`
+
+Ambos métodos de importación devuelven `Title` con `id=None` — el ID lo asigna la DB al insertar. Los valores nulos del archivo (`None`, `""`, `"None"`) se normalizan correctamente.
 
 ### `ui/main_window.py`
 - `QMainWindow` con `QTableWidget`
 - Barra de filtros: tipo, estado, plataforma (cargados desde DB)
 - Barra de búsqueda con debounce de 300 ms
-- Botones de acción sobre títulos: Agregar, Editar, Ver detalle, Eliminar, Exportar
+- Botones de acción sobre títulos: Agregar, Editar, Ver detalle, Eliminar, Exportar, Importar
 - Botones de gestión de catálogos: Tipos, Estados, Plataformas
 - Al cerrar cualquier diálogo de catálogo, refresca el filtro correspondiente con `blockSignals`
 
@@ -153,8 +160,18 @@ PyInstaller   # solo para generar el ejecutable
 
 `sqlite3` viene incluido en Python — no necesita instalarse.
 
+## Migración y backup
+
+Dos mecanismos con propósitos distintos:
+
+| Método | Qué incluye | Uso |
+|--------|-------------|-----|
+| Copiar `tracker.db` | Títulos + catálogos personalizados | Migración completa entre equipos, backup total |
+| Exportar/Importar CSV o JSON | Solo títulos | Mezcla de datos, backup parcial, interoperabilidad |
+
+Al importar, los valores de `type`, `status` y `platform` se guardan tal cual vienen del archivo. Si alguno no existe en el catálogo de la DB de destino, el título queda guardado correctamente pero ese valor no aparece en filtros ni dropdowns hasta que el usuario lo agregue al catálogo manualmente.
+
 ## Notas de implementación
 
 - El archivo `tracker.db` vive en `db/tracker.db` relativo al ejecutable, nunca una ruta absoluta. En modo PyInstaller usa `os.path.dirname(sys.executable)`
-- Backup: copiar el `.db` es suficiente
 - Escalabilidad: SQLite soporta millones de registros; para este caso (cientos de títulos) nunca será un cuello de botella

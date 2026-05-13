@@ -98,12 +98,14 @@ class MainWindow(QMainWindow):
         self._btn_detail = QPushButton("Ver detalle")
         self._btn_delete = QPushButton("Eliminar")
         self._btn_export = QPushButton("Exportar")
+        self._btn_import = QPushButton("Importar")
         self._btn_types = QPushButton("Tipos")
         self._btn_statuses = QPushButton("Estados")
         self._btn_platforms = QPushButton("Plataformas")
 
         for btn in (self._btn_add, self._btn_edit, self._btn_detail, self._btn_delete,
-                    self._btn_export, self._btn_types, self._btn_statuses, self._btn_platforms):
+                    self._btn_export, self._btn_import, self._btn_types,
+                    self._btn_statuses, self._btn_platforms):
             action_bar.addWidget(btn)
 
         self._btn_add.clicked.connect(self._open_add_dialog)
@@ -111,6 +113,7 @@ class MainWindow(QMainWindow):
         self._btn_detail.clicked.connect(self._open_detail_view)
         self._btn_delete.clicked.connect(self._delete_selected)
         self._btn_export.clicked.connect(self._export_dialog)
+        self._btn_import.clicked.connect(self._import_dialog)
         self._btn_types.clicked.connect(self._open_types_dialog)
         self._btn_statuses.clicked.connect(self._open_statuses_dialog)
         self._btn_platforms.clicked.connect(self._open_platforms_dialog)
@@ -258,6 +261,45 @@ class MainWindow(QMainWindow):
             title_id = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
             self._manager.delete(title_id)
             self._refresh_table()
+
+    def _import_dialog(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Importar biblioteca",
+            "",
+            "CSV y JSON (*.csv *.json);;CSV (*.csv);;JSON (*.json)",
+        )
+        if not path:
+            return
+
+        try:
+            if path.endswith('.csv'):
+                candidates = self._exporter.from_csv(path)
+            else:
+                candidates = self._exporter.from_json(path)
+        except Exception as e:
+            QMessageBox.critical(self, "Error al importar", f"No se pudo leer el archivo:\n{e}")
+            return
+
+        existing = {t.title.lower() for t in self._manager.get_all()}
+        imported = skipped = 0
+        for t in candidates:
+            if not t.title:
+                continue
+            if t.title.lower() in existing:
+                skipped += 1
+            else:
+                self._manager.add(t)
+                existing.add(t.title.lower())
+                imported += 1
+
+        self._refresh_table()
+        partes = []
+        if imported:
+            partes.append(f"{imported} título(s) importado(s)")
+        if skipped:
+            partes.append(f"{skipped} omitido(s) por nombre duplicado")
+        QMessageBox.information(self, "Importación completada", ".\n".join(partes) + ".")
 
     def _export_dialog(self) -> None:
         path, selected_filter = QFileDialog.getSaveFileName(
